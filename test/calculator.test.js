@@ -1,24 +1,48 @@
 const request = require('supertest');
-const app = require('../index');
+const express = require('express');
+const { app } = require('../index');
 
 describe('Calculator API', () => {
-    test('adds two numbers', async () => {
-        const response = await request(app)
-            .post('/add')
-            .send({ num1: 5, num2: 3 });
-        expect(response.body.result).toBe(8);
+    let server;
+
+    beforeAll(() => {
+        server = app.listen(3001);
     });
 
-    test('subtracts two numbers', async () => {
-        const response = await request(app)
-            .post('/subtract')
-            .send({ num1: 5, num2: 3 });
-        expect(response.body.result).toBe(2);
+    afterAll((done) => {
+        server.close(done);
     });
-    test('multiplies two numbers', async () => {
-        const response = await request(app)
-            .post('/multiply')
-            .send({ num1: 4, num2: 3 });
-        expect(response.body.result).toBe(12);
+
+    describe('POST /add', () => {
+        it('should add two numbers', async () => {
+            const res = await request(server) // Note: using server instead of app
+                .post('/add')
+                .send({ num1: 5, num2: 3 });
+            
+            expect(res.statusCode).toBe(200);
+            expect(res.body).toHaveProperty('result', 8);
+        });
+    });
+
+    describe('POST /subtract', () => {
+        it('should subtract two numbers', async () => {
+            const res = await request(server)
+                .post('/subtract')
+                .send({ num1: 5, num2: 3 });
+            
+            expect(res.statusCode).toBe(200);
+            expect(res.body).toHaveProperty('result', 2);
+        });
+    });
+
+    describe('POST /multiply', () => {
+        it('should multiply two numbers', async () => {
+            const res = await request(server)
+                .post('/multiply')
+                .send({ num1: 4, num2: 3 });
+            
+            expect(res.statusCode).toBe(200);
+            expect(res.body).toHaveProperty('result', 12);
+        });
     });
 });
